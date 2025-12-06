@@ -5,6 +5,7 @@ import config from "@/data/config.json";
 
 export default function Leaderboard() {
   const [players, setPlayers] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [timeLeft, setTimeLeft] = useState<string>("");
 
   useEffect(() => {
@@ -13,9 +14,11 @@ export default function Leaderboard() {
       .then((data) => {
         console.log("/api/riot/player payload", data);
         setPlayers(data);
+        setLoading(false);
       })
       .catch((err) => {
         console.error("Failed to fetch players", err);
+        setLoading(false);
       });
   }, []);
 
@@ -63,6 +66,17 @@ export default function Leaderboard() {
       <div className="border-t border-gray-800 mb-6" />
 
       <div className="overflow-hidden rounded-xl border border-gray-800 shadow-xl w-full">
+        {loading ? (
+          <div className="flex items-center justify-center p-12">
+            <div className="flex items-center gap-4 bg-gray-900 border border-gray-700 rounded-xl px-6 py-4">
+              <svg className="animate-spin h-6 w-6 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+              </svg>
+              <span className="text-white font-medium">Comptage de tous ces LP… (ça en fait beaucoup)</span>
+            </div>
+          </div>
+        ) : (
         <table className="w-full border-collapse table-fixed">
           <thead className="bg-gray-900 text-gray-300">
             <tr>
@@ -216,6 +230,7 @@ export default function Leaderboard() {
             ))}
           </tbody>
         </table>
+        )}
       </div>
     </div>
   );
