@@ -153,8 +153,6 @@ export default function Leaderboard() {
                   </div>
                 </td>
 
-                {/* Position Rank by lpDiff (descending) */}
-                
 
                   {/* Position Rank by lpDiff (descending) */}
                   <td className="relative p-6 text-center">
