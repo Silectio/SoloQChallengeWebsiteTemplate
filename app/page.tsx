@@ -150,7 +150,7 @@ export default function Leaderboard() {
                         : i === 1
                         ? "bg-gray-300 text-black"
                         : i === 2
-                        ? "bg-orange-500 text-white"
+                        ? "bg-orange-500 text-black"
                         : "bg-gray-800 text-white";
                       return (
                         <span className={`${base} ${bg}`}>{i + 1}</span>
