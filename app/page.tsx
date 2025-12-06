@@ -1,65 +1,226 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useEffect, useState } from "react";
+import config from "@/data/config.json";
+
+export default function Leaderboard() {
+  const [players, setPlayers] = useState<any[]>([]);
+  const [timeLeft, setTimeLeft] = useState<string>("");
+
+  useEffect(() => {
+    fetch("/api/riot/player", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data) => {
+        console.log("/api/riot/player payload", data);
+        setPlayers(data);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch players", err);
+      });
+  }, []);
+
+  // Countdown setup
+  useEffect(() => {
+    const end = new Date(config.endDate).getTime();
+    const tick = () => {
+      const now = Date.now();
+      const diff = Math.max(0, end - now);
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      setTimeLeft(`${days}j ${hours}h ${minutes}m ${seconds}s`);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const getTierColor = (tier) => {
+    switch (tier.toLowerCase()) {
+      case "challenger": return "bg-blue-500 text-white";
+      case "grandmaster": return "bg-red-600 text-white";
+      case "master": return "bg-purple-600 text-white";
+      case "diamond": return "bg-indigo-500 text-white";
+      case "emerald": return "bg-green-500 text-white";
+      case "platinum": return "bg-teal-500 text-white";
+      default: return "bg-gray-700 text-white";
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="p-8 w-full max-w-[1600px] mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-4xl font-bold">Vulcanone Challenge</h1>
+        {/* Countdown Card */}
+        <div className="bg-gray-900 border border-gray-700 rounded-xl px-6 py-4 shadow-md w-[280px]">
+          <div className="text-gray-300 text-xs">Fin dans</div>
+          <div className="text-white text-lg font-semibold tracking-wide whitespace-nowrap">{timeLeft}</div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </div>
+
+      {/* Separator */}
+      <div className="border-t border-gray-800 mb-6" />
+
+      <div className="overflow-hidden rounded-xl border border-gray-800 shadow-xl w-full">
+        <table className="w-full border-collapse table-fixed">
+          <thead className="bg-gray-900 text-gray-300">
+            <tr>
+              {/* Colonne splash intégrée au Player */}
+              <th className="p-4 text-left w-[28%]">Player</th>
+              {/* Nouvelle colonne Rank (position by lpDiff) */}
+              <th className="p-4 text-left w-[7%]">Rank</th>
+              {/* Rank (tier + LP) */}
+              <th className="p-4 text-left w-[18%]">Solo Queue Rank</th>
+              <th className="p-4 text-left w-[13%]">Winrate</th>
+              <th className="p-4 text-left w-[7%]">Matches</th>
+              {/* Nouvelle colonne Δ LP */}
+              <th className="p-4 text-left w-[7%]">Δ LP</th>
+                {/* Nouvelle colonne DPM link */}
+                <th className="p-4 text-left w-[8%]">DPM</th>
+            </tr>
+          </thead>
+
+          <tbody className="bg-gray-950">
+            {([...players]
+              .sort((a: any, b: any) => Number(b.lpDiff || 0) - Number(a.lpDiff || 0))
+            ).map((p: any, i) => (
+              <tr
+                key={i}
+                className="relative border-b border-gray-800"
+                style={{ height: "120px" }}
+              >
+                {/* Player: background splash limité à la cellule */}
+                <td className="relative p-6 overflow-hidden">
+                  {(() => {
+                    const champ = (p.champion || "Aatrox").replace(/\s+/g, "");
+                    const splashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champ}_0.jpg`;
+                    return (
+                      <>
+                        <img
+                          src={splashUrl}
+                          alt={`${champ} splash`}
+                          className="absolute inset-0 w-full h-full object-cover"
+                          style={{
+                            // Crop plus prononcé à gauche
+                            transform: "scale(1.28) translateX(-40px)",
+                            transformOrigin: "40% center",
+                            objectPosition: "40% 15%",
+                            filter: "brightness(0.9)",
+                          }}
+                          loading="lazy"
+                        />
+                        {/* Dégradé gauche -> droite */}
+                        <div
+                          className="absolute inset-0 pointer-events-none"
+                          style={{
+                            background:
+                              "linear-gradient(90deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.9) 14%, rgba(0,0,0,0.82) 24%, rgba(0,0,0,0.7) 34%, rgba(0,0,0,0.55) 44%, rgba(0,0,0,0.4) 52%, rgba(0,0,0,0.26) 60%, rgba(0,0,0,0.14) 68%, rgba(0,0,0,0.06) 74%, rgba(0,0,0,0.02) 80%, rgba(0,0,0,0) 88%, rgba(0,0,0,0) 100%)",
+                          }}
+                        />
+                        {/* Dégradé droite -> gauche ajouté */}
+                        <div
+                          className="absolute inset-0 pointer-events-none"
+                          style={{
+                            background:
+                              "linear-gradient(270deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.6) 10%, rgba(0,0,0,0.3) 25%, rgba(0,0,0,0) 40%)",
+                          }}
+                        />
+                      </>
+                    );
+                  })()}
+                  <div className="relative z-10">
+                    {/* ...removed backdrop-blur-[3px]... */}
+                    <div className="font-semibold text-white drop-shadow-md text-xl">
+                      {p.gameName}
+                    </div>
+                    <div className="text-gray-300 text-sm drop-shadow-md">#{p.tagLine}</div>
+                  </div>
+                </td>
+
+                {/* Position Rank by lpDiff (descending) */}
+                
+
+                  {/* Position Rank by lpDiff (descending) */}
+                  <td className="relative p-6">
+                    {(() => {
+                      const base = "inline-flex items-center justify-center w-10 h-10 rounded-md font-semibold";
+                      const bg = i === 0
+                        ? "bg-yellow-500 text-black"
+                        : i === 1
+                        ? "bg-gray-300 text-black"
+                        : i === 2
+                        ? "bg-orange-500 text-white"
+                        : "bg-gray-800 text-white";
+                      return (
+                        <span className={`${base} ${bg}`}>{i + 1}</span>
+                      );
+                    })()}
+                  </td>
+
+                {/* Rank (tier + LP) with medal for top lpDiff */}
+                <td className="relative p-6">
+                  <div className="flex items-center gap-2">
+                    <span className={`px-3 py-1 rounded-md ${getTierColor(p.tier)} font-semibold`}>
+                      {p.tier} {p.rank} {typeof p.lp === "number" ? `${p.lp}LP` : ""}
+                    </span>
+                  </div>
+                </td>
+
+                {/* Winrate */}
+                <td className="relative p-6 text-white">
+                  {p.winrate}% ({p.wins}W/{p.losses}L)
+                </td>
+
+                {/* Matches */}
+                <td className="relative p-6 text-white">
+                  {Number(p.wins || 0) + Number(p.losses || 0)}
+                </td>
+
+                {/* Δ LP */}
+                {/* Δ LP */}
+<td className="relative p-6 text-white">
+  {(() => {
+    const diff = Number(p.lpDiff);
+    if (isNaN(diff)) {
+      return <span className="text-gray-600">0</span>;
+    }
+    return (
+      <span className={diff >= 0 ? "text-green-400" : "text-red-400"}>
+        {diff >= 0 ? "+" : ""}{diff}
+      </span>
+    );
+  })()}
+</td>
+
+                {/* DPM link icon */}
+                
+                
+                  {/* DPM link icon only */}
+                  <td className="relative p-6">
+                    <a
+                      href={`https://dpm.lol/${encodeURIComponent(p.gameName)}-${encodeURIComponent(p.tagLine)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-gray-800 hover:bg-gray-700 text-blue-400 hover:text-blue-300"
+                      title="Voir sur dpm.lol"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="w-5 h-5"
+                      >
+                        <path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3ZM5 5h6v2H7v10h10v-4h2v6H5V5Z" />
+                      </svg>
+                    </a>
+                  </td>
+
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
