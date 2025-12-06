@@ -85,17 +85,14 @@ export default function Leaderboard() {
           <thead className="bg-gray-900 text-gray-300">
             <tr>
               {/* Colonne splash intégrée au Player */}
-              <th className="p-4 text-left w-[28%]">Player</th>
+              <th className="p-4 text-left w-[38%]">Player</th>
               {/* Nouvelle colonne Rank (position by lpDiff) */}
-              <th className="p-4 text-left w-[7%]">Rank</th>
+              <th className="p-4 text-center w-[2%]">Rank</th>
               {/* Rank (tier + LP) */}
-              <th className="p-4 text-left w-[18%]">Solo Queue Rank</th>
-              <th className="p-4 text-left w-[13%]">Winrate</th>
-              <th className="p-4 text-left w-[7%]">Matches</th>
-              {/* Nouvelle colonne Δ LP */}
-              <th className="p-4 text-left w-[7%]">Δ LP</th>
-                {/* Nouvelle colonne DPM link */}
-                <th className="p-4 text-left w-[8%]">DPM</th>
+              <th className="p-4 text-center w-[14%]">Solo Queue Rank</th>
+              <th className="p-4 text-center w-[14%]">Winrate</th>
+              <th className="p-4 text-center w-[4%]">Δ LP</th>
+              <th className="p-4 text-center w-[4%]">DPM</th>
             </tr>
           </thead>
 
@@ -160,7 +157,7 @@ export default function Leaderboard() {
                 
 
                   {/* Position Rank by lpDiff (descending) */}
-                  <td className="relative p-6">
+                  <td className="relative p-6 text-center">
                     {(() => {
                       const base = "inline-flex items-center justify-center w-10 h-10 rounded-md font-semibold";
                       const bg = i === 0
@@ -177,8 +174,8 @@ export default function Leaderboard() {
                   </td>
 
                 {/* Rank (tier + LP) with medal for top lpDiff */}
-                <td className="relative p-6">
-                  <div className="flex items-center gap-2">
+                <td className="relative p-6 text-center">
+                  <div className="inline-flex items-center gap-2 justify-center">
                     <span className={`px-3 py-1 rounded-md ${getTierColor(p.tier)} font-semibold`}>
                       {p.tier} {p.rank} {typeof p.lp === "number" ? `${p.lp}LP` : ""}
                     </span>
@@ -186,33 +183,63 @@ export default function Leaderboard() {
                 </td>
 
                 {/* Winrate */}
-                <td className="relative p-6 text-white">
-                  {p.winrate}% ({p.wins}W/{p.losses}L)
-                </td>
-
-                {/* Matches */}
-                <td className="relative p-6 text-white">
-                  {Number(p.wins || 0) + Number(p.losses || 0)}
-                </td>
+                  {/* Winrate as semi-circle gauge */}
+                  <td className="relative p-6 text-center">
+                    {(() => {
+                      const wins = Number(p.wins || 0);
+                      const losses = Number(p.losses || 0);
+                      const matches = wins + losses;
+                      const rate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
+                      const radius = 40;
+                      const circumference = Math.PI * radius; // semi-circle length
+                      const offset = circumference * (1 - rate / 100);
+                      return (
+                        <div className="inline-flex items-center justify-center">
+                          <svg width="120" height="70" viewBox={`0 0 ${radius * 3} ${radius * 1.75}`}>
+                            {/* Base red arc */}
+                            <path
+                              d={`M 20 ${radius+5} A ${radius} ${radius} 0 0 1 ${20 + 2*radius} ${radius+5}`}
+                              stroke="#7f1d1d" strokeWidth="12" fill="none" strokeLinecap="round"
+                            />
+                            {/* Green progress arc */}
+                            <path
+                              d={`M 20 ${radius+5} A ${radius} ${radius} 0 0 1 ${20 + 2*radius} ${radius+5}`}
+                              stroke="#16a34a" strokeWidth="12" fill="none" strokeLinecap="round"
+                              style={{ strokeDasharray: `${circumference}px`, strokeDashoffset: `${offset}px` }}
+                            />
+                            {/* Percentage text */}
+                            <text x="50%" y="60" textAnchor="middle" fill="#fff" fontSize="14" fontWeight="600">{rate}%</text>
+                          </svg>
+                          <div className="ml-4">
+                            <div className="text-white font-semibold text-sm">{wins}W </div>
+                            <div className="text-white font-semibold text-sm">{losses}L</div>
+                            <div className="text-gray-400 text-xs">{matches} matchs</div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </td>
 
                 {/* Δ LP */}
                 {/* Δ LP */}
-                <td className="relative p-6 text-white">
-                  {(() => {
-                    const diff = Number(p.lpDiff);
-                    if (isNaN(diff)) {
-                      return <span className="text-gray-600">0</span>;
-                    }
-                    return (
-                      <span className={diff >= 0 ? "text-green-400" : "text-red-400"}>
-                        {diff >= 0 ? "+" : ""}{diff}
-                      </span>
-                    );
-                  })()}
+                <td className="relative p-6 text-white text-center">
+                  <div className="inline-flex items-center justify-center w-full">
+                    {(() => {
+                      const diff = Number(p.lpDiff);
+                      if (isNaN(diff)) {
+                        return <span className="text-gray-600 inline-block text-center">0</span>;
+                      }
+                      return (
+                        <span className={(diff >= 0 ? "text-green-400" : "text-red-400") + " inline-block text-center"}>
+                          {diff >= 0 ? "+" : ""}{diff}
+                        </span>
+                      );
+                    })()}
+                  </div>
                 </td>
 
                 {/* DPM link icon only */}
-                <td className="relative p-6">
+                <td className="relative p-6 text-center pr-6">
                   <a
                     href={`https://dpm.lol/${encodeURIComponent(p.gameName)}-${encodeURIComponent(p.tagLine)}`}
                     target="_blank"
