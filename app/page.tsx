@@ -85,13 +85,13 @@ export default function Leaderboard() {
           <thead className="bg-gray-900 text-gray-300">
             <tr>
               {/* Colonne splash intégrée au Player */}
-              <th className="p-4 text-left w-[38%]">Player</th>
+              <th className="p-4 text-left w-[32%]">Player</th>
               {/* Nouvelle colonne Rank (position by lpDiff) */}
               <th className="p-4 text-center w-[2%]">Rank</th>
               {/* Rank (tier + LP) */}
               <th className="p-4 text-center w-[14%]">Solo Queue Rank</th>
-              <th className="p-4 text-center w-[14%]">Winrate</th>
               <th className="p-4 text-center w-[4%]">Δ LP</th>
+              <th className="p-4 text-center w-[14%]">Winrate</th>
               <th className="p-4 text-center w-[4%]">DPM</th>
             </tr>
           </thead>
@@ -103,7 +103,7 @@ export default function Leaderboard() {
               <tr
                 key={i}
                 className="relative border-b border-gray-800"
-                style={{ height: "120px" }}
+                style={{ height: "130px" }}
               >
                 {/* Player: background splash limité à la cellule */}
                 <td className="relative p-6 overflow-hidden">
@@ -118,7 +118,7 @@ export default function Leaderboard() {
                           className="absolute inset-0 w-full h-full object-cover"
                           style={{
                             // Crop plus prononcé à gauche
-                            transform: "scale(1.28) translateX(-40px)",
+                            transform: "scale(1.12) translateX(-40px)",
                             transformOrigin: "40% center",
                             objectPosition: "40% 15%",
                             filter: "brightness(0.9)",
@@ -175,50 +175,12 @@ export default function Leaderboard() {
 
                 {/* Rank (tier + LP) with medal for top lpDiff */}
                 <td className="relative p-6 text-center">
-                  <div className="inline-flex items-center gap-2 justify-center">
+                  <div className="inline-flex items-center justify-center">
                     <span className={`px-3 py-1 rounded-md ${getTierColor(p.tier)} font-semibold`}>
                       {p.tier} {p.rank} {typeof p.lp === "number" ? `${p.lp}LP` : ""}
                     </span>
                   </div>
                 </td>
-
-                {/* Winrate */}
-                  {/* Winrate as semi-circle gauge */}
-                  <td className="relative p-6 text-center">
-                    {(() => {
-                      const wins = Number(p.wins || 0);
-                      const losses = Number(p.losses || 0);
-                      const matches = wins + losses;
-                      const rate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
-                      const radius = 40;
-                      const circumference = Math.PI * radius; // semi-circle length
-                      const offset = circumference * (1 - rate / 100);
-                      return (
-                        <div className="inline-flex items-center justify-center">
-                          <svg width="120" height="70" viewBox={`0 0 ${radius * 3} ${radius * 1.75}`}>
-                            {/* Base red arc */}
-                            <path
-                              d={`M 20 ${radius+5} A ${radius} ${radius} 0 0 1 ${20 + 2*radius} ${radius+5}`}
-                              stroke="#7f1d1d" strokeWidth="12" fill="none" strokeLinecap="round"
-                            />
-                            {/* Green progress arc */}
-                            <path
-                              d={`M 20 ${radius+5} A ${radius} ${radius} 0 0 1 ${20 + 2*radius} ${radius+5}`}
-                              stroke="#16a34a" strokeWidth="12" fill="none" strokeLinecap="round"
-                              style={{ strokeDasharray: `${circumference}px`, strokeDashoffset: `${offset}px` }}
-                            />
-                            {/* Percentage text */}
-                            <text x="50%" y="60" textAnchor="middle" fill="#fff" fontSize="14" fontWeight="600">{rate}%</text>
-                          </svg>
-                          <div className="ml-4">
-                            <div className="text-white font-semibold text-sm">{wins}W </div>
-                            <div className="text-white font-semibold text-sm">{losses}L</div>
-                            <div className="text-gray-400 text-xs">{matches} matchs</div>
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </td>
 
                 {/* Δ LP */}
                 {/* Δ LP */}
@@ -236,6 +198,43 @@ export default function Leaderboard() {
                       );
                     })()}
                   </div>
+                </td>
+
+                {/* Winrate as semi-circle gauge */}
+                <td className="relative p-6 text-center">
+                  {(() => {
+                    const wins = Number(p.wins || 0);
+                    const losses = Number(p.losses || 0);
+                    const matches = wins + losses;
+                    const rate = matches > 0 ? Math.round((wins / matches) * 100) : 0;
+                    const radius = 40;
+                    const circumference = Math.PI * radius; // semi-circle length
+                    const offset = circumference * (1 - rate / 100);
+                    return (
+                      <div className="inline-flex items-center justify-center">
+                        <svg width="120" height="70" viewBox={`0 0 ${radius * 3} ${radius * 1.75}`}>
+                          {/* Base red arc */}
+                          <path
+                            d={`M 20 ${radius+5} A ${radius} ${radius} 0 0 1 ${20 + 2*radius} ${radius+5}`}
+                            stroke="#7f1d1d" strokeWidth="12" fill="none" strokeLinecap="round"
+                          />
+                          {/* Green progress arc */}
+                          <path
+                            d={`M 20 ${radius+5} A ${radius} ${radius} 0 0 1 ${20 + 2*radius} ${radius+5}`}
+                            stroke="#16a34a" strokeWidth="12" fill="none" strokeLinecap="round"
+                            style={{ strokeDasharray: `${circumference}px`, strokeDashoffset: `${offset}px` }}
+                          />
+                          {/* Percentage text */}
+                          <text x="50%" y="60" textAnchor="middle" fill="#fff" fontSize="14" fontWeight="600">{rate}%</text>
+                        </svg>
+                        <div className="ml-4">
+                          <div className="text-white font-semibold text-sm">{wins}W </div>
+                          <div className="text-white font-semibold text-sm">{losses}L</div>
+                          <div className="text-gray-400 text-xs">{matches} matchs</div>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </td>
 
                 {/* DPM link icon only */}
