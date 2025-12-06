@@ -32,7 +32,11 @@ export default function Leaderboard() {
       const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-      setTimeLeft(`${days}j ${hours}h ${minutes}m ${seconds}s`);
+      if (diff === 0) {
+        setTimeLeft("Challenge Terminé !");
+      } else {
+        setTimeLeft(`${days}j ${hours}h ${minutes}m ${seconds}s`);
+      }
     };
     tick();
     const id = setInterval(tick, 1000);
