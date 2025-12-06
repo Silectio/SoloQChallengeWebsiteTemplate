@@ -83,8 +83,15 @@ export async function GET() {
 
       const rankValue = rankValueMap[rank] ?? 0;
 
-      // Correction: Tier*400 + Rank*100 + LP
-      const apiTotalLP = tierValue * 400 + rankValue + lp;
+      // Logique:
+      // - Jusqu'à DIAMOND inclus: Tier*400 + Rank*100 + LP
+      // - À partir de MASTER et au-delà: on garde le palier MASTER (cap),
+      //   on ignore les divisions (Rank*100), et on additionne uniquement les LP.
+      const masterIdx = tierOrder.indexOf("MASTER"); // 7
+      const isMasterPlus = ["MASTER", "GRANDMASTER", "CHALLENGER"].includes(tier.toUpperCase());
+      const cappedTierValue = Math.min(tierValue, masterIdx);
+      const appliedRankValue = isMasterPlus ? 0 : rankValue;
+      const apiTotalLP = cappedTierValue * 400 + appliedRankValue + lp;
 
       const lp_base = typeof p.lp_base === "number" ? p.lp_base : 0;
       const lpDiff = apiTotalLP - lp_base;

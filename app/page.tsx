@@ -179,43 +179,39 @@ export default function Leaderboard() {
 
                 {/* Δ LP */}
                 {/* Δ LP */}
-<td className="relative p-6 text-white">
-  {(() => {
-    const diff = Number(p.lpDiff);
-    if (isNaN(diff)) {
-      return <span className="text-gray-600">0</span>;
-    }
-    return (
-      <span className={diff >= 0 ? "text-green-400" : "text-red-400"}>
-        {diff >= 0 ? "+" : ""}{diff}
-      </span>
-    );
-  })()}
-</td>
+                <td className="relative p-6 text-white">
+                  {(() => {
+                    const diff = Number(p.lpDiff);
+                    if (isNaN(diff)) {
+                      return <span className="text-gray-600">0</span>;
+                    }
+                    return (
+                      <span className={diff >= 0 ? "text-green-400" : "text-red-400"}>
+                        {diff >= 0 ? "+" : ""}{diff}
+                      </span>
+                    );
+                  })()}
+                </td>
 
-                {/* DPM link icon */}
-                
-                
-                  {/* DPM link icon only */}
-                  <td className="relative p-6">
-                    <a
-                      href={`https://dpm.lol/${encodeURIComponent(p.gameName)}-${encodeURIComponent(p.tagLine)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-gray-800 hover:bg-gray-700 text-blue-400 hover:text-blue-300"
-                      title="Voir sur dpm.lol"
+                {/* DPM link icon only */}
+                <td className="relative p-6">
+                  <a
+                    href={`https://dpm.lol/${encodeURIComponent(p.gameName)}-${encodeURIComponent(p.tagLine)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-gray-800 hover:bg-gray-700 text-blue-400 hover:text-blue-300"
+                    title="Voir sur dpm.lol"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="w-5 h-5"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        className="w-5 h-5"
-                      >
-                        <path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3ZM5 5h6v2H7v10h10v-4h2v6H5V5Z" />
-                      </svg>
-                    </a>
-                  </td>
-
+                      <path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3ZM5 5h6v2H7v10h10v-4h2v6H5V5Z" />
+                    </svg>
+                  </a>
+                </td>
               </tr>
             ))}
           </tbody>
